@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Prisioner Dilemma's</title>
+    <script src="https://cdn.jsdelivr.net/npm/web3/dist/web3.min.js"></script>
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+
+    <%= stylesheet_link_tag 'application', media: 'all' %>
+</head>
+<script>
+    // Ensure to check if Web3 is loaded
+        if (typeof Web3 !== 'undefined') {
+            // Use the injected web3 instance (MetaMask)
+            const web3 = new Web3(window.ethereum);
+
+            // Request account access if needed
+            window.ethereum.request({ method: 'eth_requestAccounts' })
+                .then(accounts => {
+                    console.log("Connected accounts:", accounts);
+                    // Your Web3 code follows here
+                })
+                .catch(error => {
+                    console.error("Error connecting:", error);
+                });
+        } else {
+            console.error("Please install MetaMask!");
+        }
+    // Pass the contract addresses from the Rails environment
+    const PDC_TOKEN_ADDRESS = '<%= ENV["PRISIONER_DILEMMAS_COIN_CONTRACT_ADDRESS"] %>';
+    const GAME_CONTRACT_ADDRESS = '<%= ENV["PRISIONER_DILEMMAS_GAME_CONTRACT_ADDRESS"] %>';
+  </script>
+<body>
+    <script type="module" src="assets/game.js"></script>
+    <script type="module" src="assets/app.js"></script>
+    <%= yield %>
+</body>
+</html>
