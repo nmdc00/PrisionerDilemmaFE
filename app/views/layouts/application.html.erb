@@ -5,7 +5,7 @@
     <script src="https://cdn.jsdelivr.net/npm/web3/dist/web3.min.js"></script>
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
-
+    
     <%= stylesheet_link_tag 'application', media: 'all' %>
 </head>
 <script>
@@ -27,12 +27,13 @@
             console.error("Please install MetaMask!");
         }
     // Pass the contract addresses from the Rails environment
-    const PDC_TOKEN_ADDRESS = '<%= ENV["PRISIONER_DILEMMAS_COIN_CONTRACT_ADDRESS"] %>';
-    const GAME_CONTRACT_ADDRESS = '<%= ENV["PRISIONER_DILEMMAS_GAME_CONTRACT_ADDRESS"] %>';
+    window.GAME_CONTRACT_ADDRESS = '<%= ENV["PRISIONER_DILEMMAS_GAME_CONTRACT_ADDRESS"] %>';
+    window.PDC_TOKEN_ADDRESS = '<%= ENV["PRISIONER_DILEMMAS_COIN_CONTRACT_ADDRESS"] %>';
+    console.log(GAME_CONTRACT_ADDRESS, PDC_TOKEN_ADDRESS)
   </script>
 <body>
+    <%= yield %>
     <script type="module" src="assets/game.js"></script>
     <script type="module" src="assets/app.js"></script>
-    <%= yield %>
 </body>
 </html>

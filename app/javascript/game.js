@@ -1,18 +1,17 @@
-import * as Web3 from 'https://cdn.jsdelivr.net/npm/web3/dist/web3.min.js';
-require('dotenv').config();
-
 let web3;
 let gameContract;
 let pdcToken;
 let userAccount;
 
+import { pdcAbi, gameAbi } from './app.js';
+
 // Initialize Web3 and contracts
 async function initWeb3() {
-    if (window.ethereum) {
+    if (typeof window !== 'undefined' && typeof window.ethereum !== 'undefined') {
         web3 = new Web3(window.ethereum);
         await window.ethereum.request({ method: 'eth_requestAccounts' }); // Request account access
     } else {
-        console.error('MetaMask not found. Please install MetaMask.');
+        console.error('MetaMask is not installed. Please install it to use this app.');
         return;
     }
 
@@ -23,13 +22,11 @@ async function initWeb3() {
     // Initialize contracts after web3 is set
     gameContract = new web3.eth.Contract(gameAbi, GAME_CONTRACT_ADDRESS);
     pdcToken = new web3.eth.Contract(pdcAbi, PDC_TOKEN_ADDRESS);
-
-    // Display game info on load
-    await displayGameInfo();
 }
 
 // Join the game
 async function joinGame() {
+    console.log('Join Game button clicked');
     try {
         const entryFee = await gameContract.methods.entryFee().call();
         console.log('Entry Fee:', entryFee);
@@ -48,6 +45,7 @@ async function joinGame() {
 
 // Commit choice
 async function commitChoice(betray) {
+    console.log(`Commit choice called with betray: ${betray}`);
     const nonce = Math.floor(Math.random() * 1000000); // Generate random nonce
     const commitment = web3.utils.soliditySha3(betray, nonce);
 
@@ -74,29 +72,41 @@ async function revealChoice() {
     }
 }
 
-// Display game info
-async function displayGameInfo() {
-    try {
-        const round = await gameContract.methods.currentRound().call();
-        const status = await gameContract.methods.roundEndTime().call();
-
-        document.getElementById('currentRound').textContent = round;
-        document.getElementById('gameStatus').textContent = status > Math.floor(Date.now() / 1000) ? 'Ongoing' : 'Ended';
-    } catch (error) {
-        console.error('Error fetching game info:', error);
-        alert('Failed to fetch game info. Please check console for details.');
-    }
-}
-
-console.log('Ethereum object:', window.ethereum);
-
 // Initialize Web3 on page load
-window.addEventListener('load', initWeb3);
+window.addEventListener('load', async () => {
+    console.log('Page fully loaded');
+    await initWeb3();
+    
+    // Attach button event listeners
+    const joinGameButton = document.getElementById('joinGame');
+    if (joinGameButton) {
+        joinGameButton.addEventListener('click', joinGame);
+        console.log('Join Game button listener attached');
+    } else {
+        console.error('Join Game button not found');
+    }
 
-// Attach button event listeners
-document.getElementById('joinGame').addEventListener('click', joinGame);
-document.getElementById('commitBetray').addEventListener('click', () => commitChoice(true));
-document.getElementById('commitCooperate').addEventListener('click', () => commitChoice(false));
-document.getElementById('revealChoice').addEventListener('click', revealChoice);
+    const commitBetrayButton = document.getElementById('commitBetray');
+    if (commitBetrayButton) {
+        commitBetrayButton.addEventListener('click', () => commitChoice(true));
+        console.log('Commit Betray button listener attached');
+    } else {
+        console.error('Commit Betray button not found');
+    }
 
-initWeb3();
+    const commitCooperateButton = document.getElementById('commitCooperate');
+    if (commitCooperateButton) {
+        commitCooperateButton.addEventListener('click', () => commitChoice(false));
+        console.log('Commit Cooperate button listener attached');
+    } else {
+        console.error('Commit Cooperate button not found');
+    }
+
+    const revealChoiceButton = document.getElementById('revealChoice');
+    if (revealChoiceButton) {
+        revealChoiceButton.addEventListener('click', revealChoice);
+        console.log('Reveal Choice button listener attached');
+    } else {
+        console.error('Reveal Choice button not found');
+    }
+});

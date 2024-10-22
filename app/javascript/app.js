@@ -1,8 +1,11 @@
-// Import Web3
-import * as Web3 from 'https://cdn.jsdelivr.net/npm/web3/dist/web3.min.js';
-
 // Ensure Web3 is connected to the Ethereum network
 let web3;
+let gameContract;
+let pdcToken;
+let userAccount; // Declare userAccount globally
+
+console.log('App.js is loading...');
+
 if (window.ethereum) {
   web3 = new Web3(window.ethereum);
   window.ethereum.enable(); // Request account access
@@ -646,54 +649,45 @@ const gameAbi = [
 	}
 ]
 
-// Initialize contract addresses from environment variables defined in your Rails view
-const PDC_TOKEN_ADDRESS = '<%= ENV["PRISONER_DILEMMAS_COIN_CONTRACT_ADDRESS"] %>';
-const GAME_CONTRACT_ADDRESS = '<%= ENV["PRISONER_DILEMMAS_GAME_CONTRACT_ADDRESS"] %>';
+// Export the ABIs
+export { pdcAbi, gameAbi };
 
-// Initialize the contracts
-const gameContract = new web3.eth.Contract(gameAbi, GAME_CONTRACT_ADDRESS);
-const tokenContract = new web3.eth.Contract(tokenAbi, PDC_TOKEN_ADDRESS);
-
-// Function to fetch game details
-async function getGameDetails() {
+async function displayGameInfo() {
+    console.log('Displaying game information...');
     try {
-        const gameDetails = await gameContract.methods.getGameDetails().call();
-        console.log("Game Details:", gameDetails);
+        const round = await gameContract.methods.currentRound().call();
+        const status = await gameContract.methods.roundEndTime().call();
+
+        document.getElementById('currentRound').textContent = round;
+        document.getElementById('gameStatus').textContent = status > Math.floor(Date.now() / 1000) ? 'Ongoing' : 'Ended';
     } catch (error) {
-        console.error("Error fetching game details:", error);
+        console.error('Error fetching game info:', error);
+        alert('Failed to fetch game info. Please check console for details.');
     }
 }
-
-// Function to get token balance for a specific address
-async function getTokenBalance(address) {
-    try {
-        const balance = await tokenContract.methods.balanceOf(address).call();
-        console.log(`Token Balance of ${address}:`, balance);
-    } catch (error) {
-        console.error("Error fetching token balance:", error);
+// Initialize Web3 and contracts
+async function initWeb3() {
+    console.log('Initializing Web3...');
+    
+    if (window.ethereum) {
+        web3 = new Web3(window.ethereum);
+        await window.ethereum.request({ method: 'eth_requestAccounts' }); // Request account access
+    } else {
+        console.error('MetaMask not found. Please install MetaMask.');
+        return;
     }
-}
 
-// Event listener to fetch game details when the page loads
-window.onload = function() {
-    getGameDetails();
-
-    // Replace with the user's Ethereum address as needed
-    const userAddress = '<User Ethereum Address>';
-    getTokenBalance(userAddress);
-};
-
-// Example function to transfer tokens
-async function transferTokens(toAddress, amount) {
     const accounts = await web3.eth.getAccounts();
-    try {
-        await tokenContract.methods.transfer(toAddress, amount).send({ from: accounts[0] });
-        console.log(`Transferred ${amount} tokens to ${toAddress}`);
-    } catch (error) {
-        console.error("Error transferring tokens:", error);
-    }
+    userAccount = accounts[0];
+    console.log('Connected account:', userAccount);
+
+    // Initialize contracts after web3 is set
+    gameContract = new web3.eth.Contract(gameAbi, GAME_CONTRACT_ADDRESS);
+    pdcToken = new web3.eth.Contract(pdcAbi, PDC_TOKEN_ADDRESS);
+
+    // Display game info on load
+    await displayGameInfo();
 }
 
-// Example of transferring tokens
-// Uncomment the line below to perform a transfer
-// transferTokens('<Recipient Ethereum Address>', 100);
+// Load the Web3 initialization when the window is ready
+window.addEventListener('load', initWeb3);

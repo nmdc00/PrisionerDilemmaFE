@@ -13,3 +13,29 @@
  *= require_tree .
  *= require_self
  */
+
+/* Ensure the body takes up the full screen */
+body {
+  margin: 0;
+  height: 100vh;
+  display: flex;
+  justify-content: center;  /* Centers horizontally */
+  align-items: center;      /* Centers vertically */
+  font-family: Arial, sans-serif; /* Optional, for better readability */
+}
+
+.game {
+  text-align: center; /* Centers text within the game container */
+  padding: 20px;
+  border: 2px solid #333;
+  border-radius: 10px;
+  background-color: #f9f9f9;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+button {
+  padding: 10px 20px;
+  margin: 10px;
+  font-size: 16px;
+  cursor: pointer;
+}
