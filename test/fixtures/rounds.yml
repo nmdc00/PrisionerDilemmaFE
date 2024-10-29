@@ -1,0 +1,25 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  game: one
+  round_number: 1
+  start_time: 2024-10-29 11:14:47
+  end_time: 2024-10-29 11:14:47
+  status: MyString
+  total_pot: 9.99
+  betrayers_count: 1
+  cooperators_count: 1
+  created_at: 2024-10-29 11:14:47
+  updated_at: 2024-10-29 11:14:47
+
+two:
+  game: two
+  round_number: 1
+  start_time: 2024-10-29 11:14:47
+  end_time: 2024-10-29 11:14:47
+  status: MyString
+  total_pot: 9.99
+  betrayers_count: 1
+  cooperators_count: 1
+  created_at: 2024-10-29 11:14:47
+  updated_at: 2024-10-29 11:14:47

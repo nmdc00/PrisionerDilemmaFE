@@ -22,10 +22,50 @@ async function initWeb3() {
     // Initialize contracts after web3 is set
     gameContract = new web3.eth.Contract(gameAbi, GAME_CONTRACT_ADDRESS);
     pdcToken = new web3.eth.Contract(pdcAbi, PDC_TOKEN_ADDRESS);
+    
+    await checkPlayerJoined();
 }
 
+async function checkPlayerJoined() {
+    const playerAddress = await web3.eth.getAccounts().then(accounts => accounts[0]);
+    
+    fetch(`/players/check_join_status?address=${playerAddress}`)
+        .then(response => {
+            if (!response.ok) {
+            throw new Error(`Error: ${response.statusText}`);
+            }
+            return response.json(); 
+        })
+        .then(data => {
+            if (data.joined) {
+            document.getElementById('joinButton').disabled = true;
+            }
+        })
+        .catch(error => console.error("Request failed:", error));
+  }
+  
+  // Call this function on page load
+  checkPlayerJoined();
 // Join the game
 async function joinGame() {
+    const playerAddress = await web3.eth.getAccounts().then(accounts => accounts[0]);
+
+    fetch(`/players/join`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ address: playerAddress })
+      })
+        .then(response => response.json())
+        .then(data => {
+          if (data.error) {
+            alert(data.error);
+          } else {
+            alert(data.message);
+          }
+        });
+
     console.log('Join Game button clicked');
     try {
         const entryFee = await gameContract.methods.entryFee().call();
@@ -44,17 +84,17 @@ async function joinGame() {
 }
 
 // Commit choice
-async function commitChoice(betray) {
-    console.log(`Commit choice called with betray: ${betray}`);
-    const nonce = Math.floor(Math.random() * 1000000); // Generate random nonce
-    const commitment = web3.utils.soliditySha3(betray, nonce);
-
+async function commitChoice(betray, nonce) {
     try {
-        await gameContract.methods.commitChoice(commitment).send({ from: userAccount });
-        alert(`Committed to ${betray ? 'betray' : 'cooperate'}. Keep your nonce secret!`);
+        // Ensure 'betray' is boolean and 'nonce' is a number
+        const isBetray = Boolean(betray); // Convert to boolean, just in case
+        const parsedNonce = parseInt(nonce, 10); // Convert to integer
+
+        // Call the contract's commitChoice function
+        await gameContract.methods.commitChoice(isBetray, parsedNonce).send({ from: playerAddress });
+        console.log("Choice committed successfully!");
     } catch (error) {
-        console.error('Error committing choice:', error);
-        alert('Failed to commit choice. Please check console for details.');
+        console.error("Error committing choice:", error);
     }
 }
 
