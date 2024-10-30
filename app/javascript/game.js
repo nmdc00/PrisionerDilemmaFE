@@ -48,12 +48,14 @@ async function checkPlayerJoined() {
   checkPlayerJoined();
 // Join the game
 async function joinGame() {
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
     const playerAddress = await web3.eth.getAccounts().then(accounts => accounts[0]);
 
     fetch(`/players/join`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'X-CSRF-Token': csrfToken
         },
         body: JSON.stringify({ address: playerAddress })
       })

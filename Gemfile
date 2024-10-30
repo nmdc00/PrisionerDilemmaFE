@@ -45,6 +45,7 @@ gem "bootsnap", require: false
 gem 'dotenv-rails'  # For environment variables
 gem 'rack-cors'     # CORS settings for web3
 
+gem 'byebug'
 # Use Sass to process CSS
 # gem "sassc-rails"
 

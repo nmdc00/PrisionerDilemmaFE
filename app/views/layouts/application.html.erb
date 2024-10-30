@@ -5,7 +5,7 @@
     <script src="https://cdn.jsdelivr.net/npm/web3/dist/web3.min.js"></script>
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
-    
+    <meta name="csrf-token" content="<%= csrf_meta_tags %>">
     <%= stylesheet_link_tag 'application', media: 'all' %>
 </head>
 <script>

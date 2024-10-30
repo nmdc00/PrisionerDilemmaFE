@@ -2,13 +2,18 @@ class PlayersController < ApplicationController
     before_action :set_address_variables, only: [:join, :check_join_status]
 
     def join 
-      byebug
-      if Player.joined?(@player_address)
-        byebug
-        render json: { error: "Player already joined this round" }, status: unprocessable_entity
+      @player = Player.find_or_create_by(address: params[:address])
+      if @player.joined?(@current_round)
+        render json: { error: "Player has already joined this round." }, status: :unprocessable_entity
       else
-        Player.create!(address: @player_address, round_joined: @current_round)
-        render json: { message: "Player successfulyl joined this round" , current_round: current_round }, status: ok
+        # Logic to add player to the current round
+        @player.round_joined = @current_round
+        if @player.save
+        # Proceed with your logic for joining the game
+          render json: { message: "Player joined successfully." }, status: :ok
+        else 
+          render json: { error: "Failed to join player", messages: @player.errors.full_messages }, status: :unprocessable_entity
+        end
       end
     end
     
@@ -17,8 +22,7 @@ class PlayersController < ApplicationController
         render json: { error: "Address parameter is missing" }, status: :unprocessable_entity
         return
       end
-  
-      joined = current_round.player_joined?(address) if current_round
+      
       render json: { joined: joined || false }
     end
 
@@ -26,7 +30,7 @@ class PlayersController < ApplicationController
 
     def set_address_variables
       @player_address = params[:adress]
-      @current_round = Game.round
+      @current_round = Game.current_round
     end
 end
 
